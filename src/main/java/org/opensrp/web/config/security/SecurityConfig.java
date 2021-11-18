@@ -12,6 +12,7 @@ import static org.springframework.http.HttpMethod.PUT;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.util.Arrays;
 
 import org.keycloak.adapters.KeycloakDeployment;
@@ -55,9 +56,6 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 	@Value("${keycloak.configurationFile:WEB-INF/keycloak.json}")
 	private Resource keycloakConfigFileResource;
 
-	@Value("#{opensrp['metrics.ip_allowed'] ?: '127.0.0.1' }")
-	private String metricsIpAllowed;
-
 	@Autowired
 	private KeycloakClientRequestFactory keycloakClientRequestFactory;
 	
@@ -94,7 +92,8 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 			.authorizeRequests()
 			.mvcMatchers("/index.html").permitAll()
 			.mvcMatchers("/health").permitAll()
-			.mvcMatchers("/metrics").hasIpAddress(metricsIpAllowed)
+			.mvcMatchers("/metrics")
+				.access("(hasIpAddress('127.0.0.1') or hasIpAddress('" + InetAddress.getLocalHost().getHostAddress()+ "'))")
 			.mvcMatchers("/").permitAll()
 			.mvcMatchers("/logout.do").permitAll()
 			.mvcMatchers("/rest/viewconfiguration/**").permitAll()
