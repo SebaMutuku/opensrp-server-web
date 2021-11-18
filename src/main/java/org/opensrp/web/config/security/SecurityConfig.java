@@ -54,7 +54,10 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 	
 	@Value("${keycloak.configurationFile:WEB-INF/keycloak.json}")
 	private Resource keycloakConfigFileResource;
-	
+
+	@Value("#{opensrp['metrics.ip_allowed'] ?: '127.0.0.1' }")
+	private String metricsIpAllowed;
+
 	@Autowired
 	private KeycloakClientRequestFactory keycloakClientRequestFactory;
 	
@@ -91,6 +94,7 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
 			.authorizeRequests()
 			.mvcMatchers("/index.html").permitAll()
 			.mvcMatchers("/health").permitAll()
+			.mvcMatchers("/metrics").hasIpAddress(metricsIpAllowed)
 			.mvcMatchers("/").permitAll()
 			.mvcMatchers("/logout.do").permitAll()
 			.mvcMatchers("/rest/viewconfiguration/**").permitAll()
